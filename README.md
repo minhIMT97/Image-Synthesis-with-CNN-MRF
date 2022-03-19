@@ -13,4 +13,4 @@ The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We 
 
 ### Defaut results on VGG19
 
-![VGG result]("images/VGG result.PNG")
+![VGG result](images/VGG_result.PNG)
