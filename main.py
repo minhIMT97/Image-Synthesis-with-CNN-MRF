@@ -1,5 +1,6 @@
 from model import CNNMRF
 import torch.optim as optim
+import matplotlib.pyplot as plt
 from torchvision import transforms
 import cv2
 import argparse
@@ -95,14 +96,18 @@ def main(config):
     iter = 0
     synthesis = None
     # create cnnmrf model
-    cnnmrf = CNNMRF(style_image=pyramid_style_image[0], content_image=pyramid_content_image[0], device=device,
+    cnnmrf = CNNMRF(style_image=pyramid_style_image[0], content_image=pyramid_content_image[0], model = config.model, device=device,
                     content_weight=config.content_weight, style_weight=config.style_weight, tv_weight=config.tv_weight,
                     gpu_chunck_size=config.gpu_chunck_size, mrf_synthesis_stride=config.mrf_synthesis_stride,
                     mrf_style_stride=config.mrf_style_stride).to(device)
 
     # Sets the module in training mode.
     cnnmrf.train()
+    # plt.figure()
+    # plt.title("Loss function")
+    # plt.xlabel("Iteration")
     for i in range(0, config.num_res):
+        loss_hist = []
         # synthesis = torch.rand_like(content_image, requires_grad=True)
         if i == 0:
             # in lowest level init the synthesis from content resized image
@@ -119,6 +124,7 @@ def main(config):
             global iter
             optimizer.zero_grad()
             loss = cnnmrf(synthesis)
+            loss_hist.append(loss.item())
             loss.backward(retain_graph=True)
             # print loss
             if (iter + 1) % 10 == 0:
@@ -137,15 +143,21 @@ def main(config):
         "----------------------"
         optimizer.step(closure)
 
+        
+        # plt.plot(loss_hist)
+        # plt.legend(["Res_1", "Res_2", "Res_3"])
+        # plt.savefig("loss_func_res34.png")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--content_path', type=str, default='./data/content1.jpg')
     parser.add_argument('--style_path', type=str, default='./data/style1.jpg')
+    parser.add_argument('--model', type=str, default='vgg')
     parser.add_argument('--max_iter', type=int, default=100)
     parser.add_argument('--sample_step', type=int, default=50)
     parser.add_argument('--content_weight', type=float, default=1)
-    parser.add_argument('--style_weight', type=float, default=0.5)
+    parser.add_argument('--style_weight', type=float, default=0.4)
     parser.add_argument('--tv_weight', type=float, default=0.1)
     parser.add_argument('--num_res', type=int, default=3)
     parser.add_argument('--gpu_chunck_size', type=int, default=512)

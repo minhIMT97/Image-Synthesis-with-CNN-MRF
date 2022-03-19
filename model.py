@@ -5,24 +5,30 @@ from mylibs import ContentLoss, StyleLoss, TVLoss
 
 
 class CNNMRF(nn.Module):
-    def __init__(self, style_image, content_image, device, content_weight, style_weight, tv_weight, gpu_chunck_size=256, mrf_style_stride=2,
+    def __init__(self, style_image, content_image, model, device, content_weight, style_weight, tv_weight, gpu_chunck_size=256, mrf_style_stride=2,
                  mrf_synthesis_stride=2):
         super(CNNMRF, self).__init__()
         # fine tune alpha_content to interpolate between the content and the style
         self.content_weight = content_weight
         self.style_weight = style_weight
         self.tv_weight = tv_weight
-        self.patch_size = 5
+        self.patch_size = 3
         self.device = device
         self.gpu_chunck_size = gpu_chunck_size
         self.mrf_style_stride = mrf_style_stride
         self.mrf_synthesis_stride = mrf_synthesis_stride
-        self.style_layers = [4,7,9] # vgg19 [11,20] resnet_teacher_note [5, slice(None, 3)]
-        self.style_layers_resnet = [1,5]
-        self.content_layers = [11] # vgg19 [22]
-        self.content_layers_resnet = [2]
-        self.model, self.content_losses, self.style_losses, self.tv_loss = \
-            self.get_model_and_losses_resnet(style_image=style_image, content_image=content_image)
+        if model == 'vgg':
+          self.style_layers = [11,20] # vgg19 [11,20] resnet_teacher_note [5, slice(None, 3)]
+          self.content_layers = [22] # vgg19 [22]
+          self.model, self.content_losses, self.style_losses, self.tv_loss = \
+              self.get_model_and_losses(style_image=style_image, content_image=content_image)
+          
+        elif model == 'resnet':
+          self.style_layers = [11,13]
+          self.content_layers = [16]
+          self.model, self.content_losses, self.style_losses, self.tv_loss = \
+              self.get_model_and_losses_resnet(style_image=style_image, content_image=content_image)
+          
 
     def forward(self, synthesis):
         """
@@ -134,122 +140,6 @@ class CNNMRF(nn.Module):
 
         return model, content_losses, style_losses, tv_loss
 
-    # def get_model_and_losses_resnet(self, style_image, content_image):
-    #     """
-    #     create network model by intermediate layer of resnet and some customized layer(style loss, content loss and tv loss)
-    #     :param style_image:
-    #     :param content_image:
-    #     :return:
-    #     """
-    #     vgg = models.resnet34(pretrained=True).to(self.device)
-    #     model = nn.Sequential()
-    #     content_losses = []
-    #     style_losses = []
-    #     # add tv loss layer
-    #     tv_loss = TVLoss()
-    #     model.add_module('tv_loss', tv_loss)
-    #     # print(vgg._modules['layer1']._modules['2']._modules.keys())
-    #     next_content_idx = 0
-    #     next_style_idx = 0
-    #     idx = 4
-    #     for i in range(len(list(vgg.children())[:-2])):
-    #         if next_content_idx >= len(self.content_layers) and next_style_idx >= len(self.style_layers):
-    #             break
-    #         # add layer of vgg19
-    #         layer = list(vgg.children())[:-2][i]
-    #         name = str(i)
-            
-    #         if i < 4:
-    #           print(name, layer)
-    #           model.add_module(name, layer)
-    #         else:
-    #           for j in range(len(list(layer.children()))):
-    #             sublayer = list(layer.children())[j]
-    #             subname = str(j+idx)
-    #             model.add_module(subname, sublayer)
-    #             if j == len(list(layer.children())) - 1:
-    #               idx = j+idx + 1
-    #         print('model: ', model)
-
-    #         # add content loss layer
-    #         if i in self.content_layers:
-    #             target = model(content_image).detach()
-    #             print('target shape: ', target.shape)
-    #             content_loss = ContentLoss(target)
-    #             model.add_module("content_loss_{}".format(next_content_idx), content_loss)
-    #             content_losses.append(content_loss)
-    #             next_content_idx += 1
-
-    #         # add style loss layer
-    #         if i in self.style_layers:
-    #             target_feature = model(style_image).detach()
-    #             style_loss = StyleLoss(target_feature, patch_size=self.patch_size, mrf_style_stride=self.mrf_style_stride,
-    #                                     mrf_synthesis_stride=self.mrf_synthesis_stride, gpu_chunck_size=self.gpu_chunck_size, device=self.device)
-
-    #             model.add_module("style_loss_{}".format(next_style_idx), style_loss)
-    #             style_losses.append(style_loss)
-    #             next_style_idx += 1
-
-    #     return model, content_losses, style_losses, tv_loss
-
-    def get_model_and_losses_resnet_2(self, style_image, content_image):
-        """
-        create network model by intermediate layer of vgg19 and some customized layer(style loss, content loss and tv loss)
-        :param style_image:
-        :param content_image:
-        :return:
-        """
-        vgg = models.alexnet(pretrained=True).to(self.device)
-        model = nn.Sequential()
-        content_losses = []
-        style_losses = []
-        # add tv loss layer
-        tv_loss = TVLoss()
-        model.add_module('tv_loss', tv_loss)
-
-        next_content_idx = 0
-        next_style_idx = 0
-
-        for j in range(len(list(vgg.children())[:-2])):
-            if next_content_idx >= len(self.content_layers) and next_style_idx >= len(self.style_layers):
-                break
-            # add layer of vgg19
-            layer1 = list(vgg.children())[j]
-            name1 = str(j)
-            if not isinstance(layer1, list):
-              layer = layer1
-              name = name1
-              print(name,layer)
-              model.add_module(name, layer)
-              print('model: ', model)
-            else:
-              for i in range(len(layer1)):
-                name2 = str(i)
-                layer = layer1[i]
-                print(name1, name2, layer)
-                model.add_module(name1, name2, layer)
-                print('model: ', model)
-
-                # add content loss layer
-                if (j in self.content_layers) and (i in self.content_layers_resnet):
-                    target = model(content_image).detach()
-                    content_loss = ContentLoss(target)
-                    model.add_module("content_loss_{}".format(next_content_idx), content_loss)
-                    content_losses.append(content_loss)
-                    next_content_idx += 1
-
-                # add style loss layer
-                if (j in self.style_layers) and (i in self.style_layers_resnet):
-                    target_feature = model(style_image).detach()
-                    style_loss = StyleLoss(target_feature, patch_size=self.patch_size, mrf_style_stride=self.mrf_style_stride,
-                                          mrf_synthesis_stride=self.mrf_synthesis_stride, gpu_chunck_size=self.gpu_chunck_size, device=self.device)
-
-                    model.add_module("style_loss_{}".format(next_style_idx), style_loss)
-                    style_losses.append(style_loss)
-                    next_style_idx += 1
-
-        return model, content_losses, style_losses, tv_loss
-
     def get_model_and_losses_resnet(self, style_image, content_image):
         """
         create network model by intermediate layer of resnet and some customized layer(style loss, content loss and tv loss)
@@ -257,7 +147,7 @@ class CNNMRF(nn.Module):
         :param content_image:
         :return:
         """
-        vgg = models.alexnet(pretrained=True).to(self.device)
+        vgg = models.resnet34(pretrained=True).to(self.device)
         model = nn.Sequential()
         content_losses = []
         style_losses = []
@@ -267,7 +157,7 @@ class CNNMRF(nn.Module):
         # print(vgg._modules['layer1']._modules['2']._modules.keys())
         next_content_idx = 0
         next_style_idx = 0
-        idx = 0
+        idx = 4
         for i in range(len(list(vgg.children())[:-2])):
             if next_content_idx >= len(self.content_layers) and next_style_idx >= len(self.style_layers):
                 break
@@ -275,7 +165,7 @@ class CNNMRF(nn.Module):
             layer = list(vgg.children())[:-2][i]
             name = str(i)
             
-            if i < 0:
+            if i < 4:
               print(name, layer)
               model.add_module(name, layer)
               print('model: ', model)
