@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as functional
+from torch import linalg as LA
 
 
 class ContentLoss(nn.Module):
@@ -11,11 +12,45 @@ class ContentLoss(nn.Module):
         super(ContentLoss, self).__init__()
         self.target = target.detach()
         self.loss = None
+        self.fidelity = None
+        self.norm_input = None
+        self.norm_target = None
+        self.corr = None
 
     def forward(self, input):
-        # print('input', input.shape)
-        # print('target',self.target.shape)
         self.loss = functional.mse_loss(input, self.target)
+        self.corr = functional.conv2d(input, self.target).squeeze()
+        self.norm_input = LA.norm(input)
+        self.norm_target = LA.norm(self.target)
+        self.fidelity = self.corr/(self.norm_input*self.norm_target)
+        return input
+
+    def update(self, target):
+        """
+        update target of content loss
+        :param target:
+        :return:
+        """
+        self.target = target.detach()
+
+
+class ContentFidelity(nn.Module):
+    """
+    compute content fidelity at 1 content layer
+    """
+    def __init__(self, target):
+        super(ContentFidelity, self).__init__()
+        self.target = target.detach()
+        self.fidelity = None
+        self.norm_input = None
+        self.norm_target = None
+        self.corr = None
+
+    def forward(self, input):
+        self.corr = functional.conv2d(input, self.target).squeeze()
+        self.norm_input = LA.norm(input)
+        self.norm_target = LA.norm(self.target)
+        self.fidelity = self.corr/(self.norm_input*self.norm_target)
         return input
 
     def update(self, target):
@@ -39,6 +74,10 @@ class StyleLoss(nn.Module):
         self.gpu_chunck_size = gpu_chunck_size
         self.device = device
         self.loss = None
+        self.fidelity = None
+        self.norm_input = None
+        self.norm_target = None
+        self.corr = None
 
         self.style_patches = self.patches_sampling(target.detach(), patch_size=self.patch_size, stride=self.mrf_style_stride)
         self.style_patches_norm = self.cal_patches_norm()
@@ -83,11 +122,29 @@ class StyleLoss(nn.Module):
             sp_ind = max_response[i_start:i_end]
             loss += torch.sum(torch.mean(torch.pow(synthesis_patches[tp_ind, :, :, :]-self.style_patches[sp_ind, :, :, :], 2), dim=[1, 2, 3]))
         self.loss = loss/len(max_response)
+        # fidelity
+        fidelity = 0
+        fidelity_patches = []
+        for i in range(0, len(max_response), self.gpu_chunck_size):
+            i_start = i
+            i_end = min(i+self.gpu_chunck_size, len(max_response))
+            tp_ind = tuple(range(i_start, i_end))
+            sp_ind = max_response[i_start:i_end]
+            for j in range(len(tp_ind)):
+                tp_j = tp_ind[j]
+                sp_j = sp_ind[j]
+                corr_patch = functional.conv2d(synthesis_patches[tp_j,:,:,:].unsqueeze(0), self.style_patches[sp_j,:,:,:].unsqueeze(0))
+                norm_input = LA.norm(synthesis_patches[tp_j,:,:,:].unsqueeze(0))
+                norm_target = LA.norm(self.style_patches[sp_j,:,:,:].unsqueeze(0))
+                fidelity_patch = corr_patch/(norm_input*norm_target)
+                fidelity_patches.append(fidelity_patch)
+            fidelity += torch.sum(torch.cat(fidelity_patches))/len(tp_ind)
+        self.fidelity = fidelity/len(max_response)
         return input
 
     def patches_sampling(self, image, patch_size, stride):
         """
-        sampling patches form a image
+        sampling patches from a image
         :param image:
         :param patch_size:
         :return:

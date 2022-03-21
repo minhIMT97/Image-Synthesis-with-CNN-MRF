@@ -123,12 +123,13 @@ def main(config):
         def closure():
             global iter
             optimizer.zero_grad()
-            loss = cnnmrf(synthesis)
-            loss_hist.append(loss.item())
+            loss, CF, SF = cnnmrf(synthesis)
             loss.backward(retain_graph=True)
-            # print loss
+            # print loss + content fidelity + local pattern fidelity
             if (iter + 1) % 10 == 0:
                 print('res-%d-iteration-%d: %f' % (i+1, iter + 1, loss.item()))
+                print('res-%d-iteration-%d, CF = %f' % (i+1, iter + 1, CF.item() if type(CF)==torch.Tensor else CF))
+                print('res-%d-iteration-%d, LP = %f' % (i+1, iter + 1, SF.item() if type(SF)==torch.Tensor else SF))
             # save image
             if (iter + 1) % config.sample_step == 0 or iter + 1 == config.max_iter:
                 image = get_synthesis_image(synthesis, denorm_transform, device)
