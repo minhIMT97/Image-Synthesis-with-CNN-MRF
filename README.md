@@ -1,6 +1,6 @@
 # Image-Synthesis-with-CNN-MRF
 
-#### Group 5-a: Binh Minh NGUYEN - Minh Triet VO
+#### Group 5-a: Binh Minh NGUYEN ([minhIMT97](https://github.com/minhIMT97)) - Minh Triet VO ([trietvo3105](https://github.com/trietvo3105))
 This is the repository for the course Computational Imaging project with the subject: Combination of Convolutional Neural Network and Markov Random Field for image synthesis.
 
 In this project, we replace the feature extractor VGG19 by other pretrained networks such as resnet34. The goal is to examize the influence of the feature extractor CNN on the result. 
