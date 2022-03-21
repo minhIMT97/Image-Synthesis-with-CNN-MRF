@@ -143,8 +143,8 @@ def main(config):
 
         "----------------------"
         optimizer.step(closure)
-	# Color metric
-	synthesis_img = get_synthesis_image(synthesis, denorm_transform, device)
+	      # Color metric
+	      synthesis_img = get_synthesis_image(synthesis, denorm_transform, device)
         synthesis_img = synthesis_img.cpu().detach().numpy()
         global_color = GC(style_image_notorch, synthesis_img)
         print("Color cosine simliarity: "global_color)
