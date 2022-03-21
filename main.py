@@ -1,4 +1,4 @@
-from model import CNNMRF
+from model import CNNMRF, GC
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from torchvision import transforms
@@ -79,6 +79,7 @@ def main(config):
 
     style_image = cv2.imread(config.style_path)
     style_image = cv2.cvtColor(style_image, cv2.COLOR_BGR2RGB)
+    style_image_notorch = style_image.copy()
     style_image = transform(style_image).unsqueeze(0).to(device)
 
     "resize image in several level for training"
@@ -117,7 +118,7 @@ def main(config):
             synthesis = unsample_synthesis(pyramid_content_image[i].shape[2], pyramid_content_image[i].shape[3], synthesis, device)
             cnnmrf.update_style_and_content_image(style_image=pyramid_style_image[i], content_image=pyramid_content_image[i])
         # max_iter (int): maximal number of iterations per optimization step
-        optimizer = optim.LBFGS([synthesis], lr=1, max_iter=config.max_iter)
+        optimizer = optim.LBFGS([synthesis], lr=2, max_iter=config.max_iter)
         "--------------------"
 
         def closure():
@@ -144,10 +145,10 @@ def main(config):
         "----------------------"
         optimizer.step(closure)
 	      # Color metric
-	      synthesis_img = get_synthesis_image(synthesis, denorm_transform, device)
+        synthesis_img = get_synthesis_image(synthesis, denorm_transform, device)
         synthesis_img = synthesis_img.cpu().detach().numpy()
         global_color = GC(style_image_notorch, synthesis_img)
-        print("Color cosine simliarity: "global_color)
+        print("Color cosine simliarity: ", global_color)
         
         # plt.plot(loss_hist)
         # plt.legend(["Res_1", "Res_2", "Res_3"])
@@ -161,8 +162,8 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='vgg')
     parser.add_argument('--max_iter', type=int, default=100)
     parser.add_argument('--sample_step', type=int, default=50)
-    parser.add_argument('--content_weight', type=float, default=1)
-    parser.add_argument('--style_weight', type=float, default=0.4)
+    parser.add_argument('--content_weight', type=float, default=0.4)
+    parser.add_argument('--style_weight', type=float, default=0.5)
     parser.add_argument('--tv_weight', type=float, default=0.1)
     parser.add_argument('--num_res', type=int, default=3)
     parser.add_argument('--gpu_chunck_size', type=int, default=512)

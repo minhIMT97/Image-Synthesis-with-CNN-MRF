@@ -1,6 +1,7 @@
 from __future__ import print_function
 import torch.nn as nn
 import torchvision.models as models
+import numpy as np
 from mylibs import ContentLoss, StyleLoss, TVLoss, ContentFidelity
 
 def GC(x,s):
@@ -9,12 +10,12 @@ def GC(x,s):
     for i in range(3):
       hist_x = np.histogram(x[:,:,i], bins = 20)[0]
       hist_s = np.histogram(s[:,:,i], bins = 20)[0]
-      GC += hist_x*hist_s/(np.linalg.norm(hist_x)*np.linalg.norm(hist_s)) 
+      GC += hist_x*hist_x/(np.linalg.norm(hist_x)*np.linalg.norm(hist_x)) 
     GC /= 3
     return np.sum(GC)
 
 class CNNMRF(nn.Module):
-    def __init__(self, style_image, content_image, device, content_weight, style_weight, tv_weight, gpu_chunck_size=256, mrf_style_stride=2,
+    def __init__(self, style_image, content_image, model, device, content_weight, style_weight, tv_weight, gpu_chunck_size=256, mrf_style_stride=2,
                  mrf_synthesis_stride=2):
         super(CNNMRF, self).__init__()
         # fine tune alpha_content to interpolate between the content and the style
@@ -26,14 +27,21 @@ class CNNMRF(nn.Module):
         self.gpu_chunck_size = gpu_chunck_size
         self.mrf_style_stride = mrf_style_stride
         self.mrf_synthesis_stride = mrf_synthesis_stride
-        self.style_layers = [12,15] #  # vgg19 [11,20], resnet_teacher_note [5, slice(None, 3)], resnet_style [11,13]
-        self.style_layers_resnet = [1,5]
-        self.content_layers = [19] #  # vgg19 [22], resnet content [19]
-        self.content_layers_resnet = [2]
-        self.model, self.content_losses, self.style_losses, self.tv_loss = \
-            self.get_model_and_losses_resnet(style_image=style_image, content_image=content_image)
-        # self.model, self.content_losses, self.style_losses, self.tv_loss = \
-        #     self.get_model_and_losses(style_image=style_image, content_image=content_image)
+        # self.style_layers = [7,11] #  # vgg19 [11,20], resnet_teacher_note [5, slice(None, 3)], resnet_style [11,13]
+        # self.style_layers_resnet = [1,5]
+        # self.content_layers = [15] #  # vgg19 [22], resnet content [19]
+        # self.content_layers_resnet = [2]
+        if model == 'vgg':
+          self.style_layers = [11,20] # vgg19 [11,20] resnet_teacher_note [5, slice(None, 3)]
+          self.content_layers = [22] # vgg19 [22]
+          self.model, self.content_losses, self.style_losses, self.tv_loss = \
+              self.get_model_and_losses(style_image=style_image, content_image=content_image)
+          
+        elif model == 'resnet':
+          self.style_layers = [7,11]
+          self.content_layers = [15]
+          self.model, self.content_losses, self.style_losses, self.tv_loss = \
+              self.get_model_and_losses_resnet(style_image=style_image, content_image=content_image)
 
     def forward(self, synthesis):
         """
@@ -234,6 +242,6 @@ class CNNMRF(nn.Module):
                     next_style_idx += 1
 
                 if j == len(list(layer.children())) - 1:
-                  idx = j+idx + 1
+                    idx = j+idx + 1
 
         return model, content_losses, style_losses, tv_loss
