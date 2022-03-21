@@ -104,9 +104,9 @@ def main(config):
 
     # Sets the module in training mode.
     cnnmrf.train()
-    # plt.figure()
-    # plt.title("Loss function")
-    # plt.xlabel("Iteration")
+    plt.figure()
+    plt.title("Loss function")
+    plt.xlabel("Iteration")
     for i in range(0, config.num_res):
         loss_hist = []
         # synthesis = torch.rand_like(content_image, requires_grad=True)
@@ -118,7 +118,7 @@ def main(config):
             synthesis = unsample_synthesis(pyramid_content_image[i].shape[2], pyramid_content_image[i].shape[3], synthesis, device)
             cnnmrf.update_style_and_content_image(style_image=pyramid_style_image[i], content_image=pyramid_content_image[i])
         # max_iter (int): maximal number of iterations per optimization step
-        optimizer = optim.LBFGS([synthesis], lr=2, max_iter=config.max_iter)
+        optimizer = optim.LBFGS([synthesis], lr=1, max_iter=config.max_iter)
         "--------------------"
 
         def closure():
@@ -150,9 +150,9 @@ def main(config):
         global_color = GC(style_image_notorch, synthesis_img)
         print("Color cosine simliarity: ", global_color)
         
-        # plt.plot(loss_hist)
-        # plt.legend(["Res_1", "Res_2", "Res_3"])
-        # plt.savefig("loss_func_res34.png")
+        plt.plot(loss_hist)
+        plt.legend(["Res_1", "Res_2", "Res_3"])
+        plt.savefig("loss_func_vgg19.png")
 
 
 if __name__ == '__main__':
@@ -162,8 +162,8 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='vgg')
     parser.add_argument('--max_iter', type=int, default=100)
     parser.add_argument('--sample_step', type=int, default=50)
-    parser.add_argument('--content_weight', type=float, default=0.4)
-    parser.add_argument('--style_weight', type=float, default=0.5)
+    parser.add_argument('--content_weight', type=float, default=1)
+    parser.add_argument('--style_weight', type=float, default=0.4)
     parser.add_argument('--tv_weight', type=float, default=0.1)
     parser.add_argument('--num_res', type=int, default=3)
     parser.add_argument('--gpu_chunck_size', type=int, default=512)
