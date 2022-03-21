@@ -3,6 +3,15 @@ import torch.nn as nn
 import torchvision.models as models
 from mylibs import ContentLoss, StyleLoss, TVLoss, ContentFidelity
 
+def GC(x,s):
+    # GE
+    GC = 0
+    for i in range(3):
+      hist_x = np.histogram(x[:,:,i], bins = 20)[0]
+      hist_s = np.histogram(s[:,:,i], bins = 20)[0]
+      GC += hist_x*hist_s/(np.linalg.norm(hist_x)*np.linalg.norm(hist_s)) 
+    GC /= 3
+    return np.mean(GC)
 
 class CNNMRF(nn.Module):
     def __init__(self, style_image, content_image, device, content_weight, style_weight, tv_weight, gpu_chunck_size=256, mrf_style_stride=2,
