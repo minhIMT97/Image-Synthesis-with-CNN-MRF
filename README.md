@@ -5,7 +5,7 @@ This is the repository for the course Computational Imaging project with the sub
 
 In this project, we replace the feature extractor VGG19 by other pretrained networks such as resnet34. The goal is to examize the influence of the feature extractor CNN on the result. 
 
-The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We added our modification to adopt resnet34 and plot the loss function. 
+The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We added our modification to adopt resnet34, compute the quantitative metrics, and plot the loss function. 
 
 ### Content and style images
 
