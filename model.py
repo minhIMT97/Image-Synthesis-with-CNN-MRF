@@ -10,7 +10,7 @@ def GC(x,s):
     for i in range(3):
       hist_x = np.histogram(x[:,:,i], bins = 20)[0]
       hist_s = np.histogram(s[:,:,i], bins = 20)[0]
-      GC += hist_x*hist_x/(np.linalg.norm(hist_x)*np.linalg.norm(hist_x)) 
+      GC += hist_x*hist_s/(np.linalg.norm(hist_x)*np.linalg.norm(hist_s)) 
     GC /= 3
     return np.sum(GC)
 
