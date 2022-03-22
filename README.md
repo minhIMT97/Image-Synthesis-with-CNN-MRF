@@ -28,10 +28,10 @@ We adopted the metrics for quantitative evaluation (beside the qualitatively per
 
 ### Defaut results on VGG19
 
-![VGG result](images/CNNMRF-VGG19.png)
+![VGG result](images/CNNMRF-vgg19.png)
 
 ### Results on Resnet34
 
-![Resnet34 result](images/CNNMRF-Resnet34.png)
+![Resnet34 result](images/CNNMRF-resnet34.png)
 
 
