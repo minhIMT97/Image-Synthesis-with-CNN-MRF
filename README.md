@@ -19,6 +19,13 @@ To run the code, clone this repository and run the command below in the terminal
 !python3 main.py --content_path data/content1.jpg --style_path data/style1.jpg --max_iter 60 --num_res 3 --content_weight 0.4 --style_weight 0.5 --tv_weight 0.001 --mrf_style_stride 1 --mrf_synthesis_stride 1 --model resnet
 ```
 
+#### Quantitative measurements
+We adopted the metrics for quantitative evaluation (beside the qualitatively perceptual metrics) for this task of texture synthesis from this nice article: 
+
+*Wang, Zhizhong & Zhao, Lei & Chen, Haibo & Zuo, Zhiwen & Li, Ailin & Xing, Wei & Lu, Dongming*. (2021). **Evaluate and improve the quality of neural style transfer**. Computer Vision and Image Understanding. 207. 103203. 10.1016/j.cviu.2021.103203
+
+![Quantitative metrics](images/metrics.png)
+
 ### Defaut results on VGG19
 
 ![VGG result](images/CNNMRF-VGG19.png)
