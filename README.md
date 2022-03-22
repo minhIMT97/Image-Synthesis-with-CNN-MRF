@@ -37,10 +37,21 @@ We adopted the metrics for quantitative evaluation (beside the qualitatively per
 ### Citations
 ```
 @article{article,
-author = {Li, Chuan and Wand, Michael},
-year = {2016},
-month = {01},
-pages = {},
-title = {Combining Markov Random Fields and Convolutional Neural Networks for Image Synthesis}
-}
+         author = {Li, Chuan and Wand, Michael},
+         year = {2016},
+         month = {01},
+         pages = {},
+         title = {Combining Markov Random Fields and Convolutional Neural Networks for Image Synthesis}
+        }
+@article{article,
+         author = {Wang, Zhizhong and Zhao, Lei and Chen, Haibo and Zuo, Zhiwen and Li, Ailin and Xing, Wei and Lu, Dongming},
+         year = {2021},
+         month = {03},
+         pages = {103203},
+         title = {Evaluate and improve the quality of neural style transfer},
+         volume = {207},
+         journal = {Computer Vision and Image Understanding},
+         doi = {10.1016/j.cviu.2021.103203}
+        }
+
 ```
