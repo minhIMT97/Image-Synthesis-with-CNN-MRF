@@ -19,10 +19,10 @@ To run the code, clone this repository and run the command below in the terminal
 
 ### Defaut results on VGG19
 
-![VGG result](images/VGG_result.PNG)
+![VGG result](images/CNNMRF-VGG19.png)
 
 ### Results on Resnet34
 
-![Resnet34 result](images/res_result.PNG)
+![Resnet34 result](images/CNNMRF-Resnet34.png)
 
 
