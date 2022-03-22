@@ -15,7 +15,9 @@ The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We 
 
 To run the code, clone this repository and run the command below in the terminal:
 
-!python3 main.py --content_path data/content1.jpg --style_path data/style2.jpg --max_iter 60 --model resnet --num_res 3
+'''
+!python3 main.py --content_path data/content1.jpg --style_path data/style1.jpg --max_iter 60 --num_res 3 --content_weight 0.4 --style_weight 0.5 --tv_weight 0.001 --mrf_style_stride 1 --mrf_synthesis_stride 1 --model resnet
+'''
 
 ### Defaut results on VGG19
 
