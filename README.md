@@ -9,7 +9,7 @@ The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We 
 
 ### Content and style images
 
-![Content and style used](images/Content_and_style.PNG)
+![Content and style used](images/CNNMRF-C&S.png)
 
 ### Algorithm testing
 
