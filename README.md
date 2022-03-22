@@ -1,11 +1,11 @@
 # Image-Synthesis-with-CNN-MRF
 
 #### Group 5-a: Binh Minh NGUYEN ([minhIMT97](https://github.com/minhIMT97)) - Minh Triet VO ([trietvo3105](https://github.com/trietvo3105))
-This is the repository for the course Computational Imaging project with the subject: Combination of Convolutional Neural Network and Markov Random Field for image synthesis.
+This is the repository for the course Computational Imaging project with the subject: Combination of Convolutional Neural Network and Markov Random Field for image synthesis. *The slide of our presentation is positioned in "Slide for final presentation" folder*.
 
 In this project, we replace the feature extractor VGG19 by other pretrained networks such as resnet34. The goal is to examize the influence of the feature extractor CNN on the result. 
 
-The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We added our modification to adopt resnet34, compute the quantitative metrics, and plot the loss function. 
+The implementation is based on: https://github.com/jonzhaocn/cnnmrf-pytorch. We added our modification to adopt ResNet34, compute the quantitative metrics, and plot the loss function. 
 
 ### Content and style images
 
@@ -34,4 +34,13 @@ We adopted the metrics for quantitative evaluation (beside the qualitatively per
 
 ![Resnet34 result](images/CNNMRF-resnet34.png)
 
-
+### Citations
+```
+@article{article,
+author = {Li, Chuan and Wand, Michael},
+year = {2016},
+month = {01},
+pages = {},
+title = {Combining Markov Random Fields and Convolutional Neural Networks for Image Synthesis}
+}
+```
