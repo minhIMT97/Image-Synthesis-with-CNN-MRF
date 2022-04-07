@@ -1,4 +1,4 @@
-# Image-Synthesis-with-CNN-MRF
+# Image Synthesis with Markov Random Field and Convolutional Neural Network
 
 #### Group 5-a: Binh Minh NGUYEN ([minhIMT97](https://github.com/minhIMT97)) - Minh Triet VO ([trietvo3105](https://github.com/trietvo3105))
 This is the repository for the course Computational Imaging project with the subject: Combination of Convolutional Neural Network and Markov Random Field for image synthesis. *The slide of our presentation is positioned in "Slide for final presentation" folder*.
